@@ -1,129 +1,39 @@
-import random
-import math
+"""
+Multimodal / Noisy Clock Walk — CLI entry point.
+
+This script provides the interactive command-line interface.
+All core logic lives in the ``clockwalk`` package and can be imported
+independently by other programs.
+"""
+
 import json
-import time
-import sys
+import math
 import os
-import glob as globmod
-from collections import Counter, defaultdict
+import sys
+from collections import defaultdict
+
+from clockwalk import (
+    DEFAULTS,
+    ascii_hist,
+    dist_clockwise,
+    dist_min_steps,
+    load_config_from_file,
+    parse_attractor_string,
+    print_data_index,
+    resolve_data_file,
+    run_monte_carlo,
+    run_staleness_winner,
+    validate_config,
+)
+
+# Re-export names that tests import from this file so existing
+# ``from clock_walk import X`` continues to work.
+from clockwalk import step_idx, list_data_files  # noqa: F401
+from clockwalk.walk import choose_move as choose_move_multimodal  # noqa: F401
 
 
 # ----------------------------
-# Defaults
-# ----------------------------
-
-DEFAULTS = {
-    "runs": 10000,
-    "target": 6,
-    "inertia": 0.7,
-    "novelty": 0.2,
-    "steps": 333,
-    "attractors": [],          # e.g. [1,6,9]
-    "attract_strength": 0.8,
-    "teleport_p": 0.002,
-    "stay_p": 0.02,
-    "try_matplotlib": False,
-    "progress_every": 500,     # update spinner every N runs
-}
-
-
-# ----------------------------
-# Data file resolution
-# ----------------------------
-
-def get_data_dir():
-    """Return the path to the data/ folder next to this script."""
-    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
-
-
-def list_data_files():
-    """Return sorted list of (index, filename, full_path) for all JSON files in data/."""
-    data_dir = get_data_dir()
-    if not os.path.isdir(data_dir):
-        return []
-    files = sorted(globmod.glob(os.path.join(data_dir, "*.json")))
-    result = []
-    for fpath in files:
-        fname = os.path.basename(fpath)
-        # extract leading integer index from filename like "0_pure_random_baseline.json"
-        parts = fname.split("_", 1)
-        try:
-            idx = int(parts[0])
-        except ValueError:
-            idx = None
-        result.append((idx, fname, fpath))
-    return result
-
-
-def resolve_data_file(arg: str):
-    """
-    Resolve a CLI argument to a data file path.
-    Accepts:
-      - An integer index (e.g. "0", "3", "9")
-      - A substring of a filename (e.g. "sticky", "attractor")
-      - An exact filename (e.g. "0_pure_random_baseline.json")
-    Returns the full path, or None if not found.
-    """
-    entries = list_data_files()
-    if not entries:
-        return None
-
-    # try as integer index
-    try:
-        idx = int(arg)
-        for entry_idx, fname, fpath in entries:
-            if entry_idx == idx:
-                return fpath
-        return None
-    except ValueError:
-        pass
-
-    # try exact filename match
-    for _, fname, fpath in entries:
-        if fname == arg:
-            return fpath
-
-    # try substring match (case-insensitive)
-    arg_lower = arg.lower()
-    matches = [(fname, fpath) for _, fname, fpath in entries if arg_lower in fname.lower()]
-    if len(matches) == 1:
-        return matches[0][1]
-    elif len(matches) > 1:
-        print(f"Ambiguous match for '{arg}'. Matches:")
-        for fname, _ in matches:
-            print(f"  {fname}")
-        return None
-
-    return None
-
-
-def print_data_index():
-    """Print a numbered list of available data configs."""
-    entries = list_data_files()
-    if not entries:
-        print("No data files found in data/ folder.")
-        return
-    print("Available data configs:")
-    for idx, fname, _ in entries:
-        prefix = f"  [{idx}]" if idx is not None else "  [?]"
-        # strip index prefix and .json suffix for display
-        name_part = fname.split("_", 1)[1].replace(".json", "").replace("_", " ") if "_" in fname else fname
-        print(f"{prefix} {name_part}  ({fname})")
-
-
-def load_config_from_file(fpath: str) -> dict:
-    """Load a JSON config file, merge with defaults, and validate."""
-    with open(fpath, "r") as f:
-        user_cfg = json.load(f)
-    if not isinstance(user_cfg, dict):
-        raise ValueError(f"JSON in {fpath} must be an object (dict).")
-    cfg = DEFAULTS.copy()
-    cfg.update(user_cfg)
-    return validate_config(cfg)
-
-
-# ----------------------------
-# Input helpers
+# Input helpers (CLI-only)
 # ----------------------------
 
 def read_int(prompt: str, min_value=None, max_value=None) -> int:
@@ -165,23 +75,7 @@ def read_attractors(prompt: str):
     s = input(prompt).strip()
     if not s:
         return []
-    parts = [p.strip() for p in s.split(",") if p.strip()]
-    out = []
-    for p in parts:
-        try:
-            v = int(p)
-        except ValueError:
-            continue
-        if 1 <= v <= 12:
-            out.append(v)
-    # unique, stable order
-    seen = set()
-    uniq = []
-    for v in out:
-        if v not in seen:
-            seen.add(v)
-            uniq.append(v)
-    return uniq
+    return parse_attractor_string(s)
 
 
 def get_config():
@@ -218,7 +112,7 @@ def get_config():
             user_cfg = json.loads(raw)
             if not isinstance(user_cfg, dict):
                 raise ValueError("JSON must be an object (dict).")
-        except Exception as e:
+        except Exception:
             print("\nInvalid JSON. Falling back to interactive prompts.")
             user_cfg = {}
 
@@ -230,7 +124,6 @@ def get_config():
     cfg = DEFAULTS.copy()
     print("\nInteractive config (press Enter to accept defaults where shown).")
 
-    # Small helper: allow blank to keep default
     def ask_int(key, prompt, min_value=None, max_value=None):
         default = cfg[key]
         s = input(f"{prompt} [{default}]: ").strip()
@@ -277,10 +170,9 @@ def get_config():
     ask_float("novelty", "Novelty bonus (0..1)", 0.0, 1.0)
     ask_int("steps", "Steps for staleness winner", min_value=1)
 
-    # attractors are easiest as comma string
     s = input(f"Attractors comma-list like 1,6,9 [{','.join(map(str,cfg['attractors'])) if cfg['attractors'] else ''}]: ").strip()
     if s != "":
-        cfg["attractors"] = read_attractors("Re-enter attractors (same format): ") if False else parse_attractor_string(s)
+        cfg["attractors"] = parse_attractor_string(s)
 
     ask_float("attract_strength", "Attractor strength (0..1)", 0.0, 1.0)
     ask_float("teleport_p", "Teleport probability per step (0..0.2)", 0.0, 0.2)
@@ -292,244 +184,8 @@ def get_config():
     return validate_config(cfg)
 
 
-def parse_attractor_string(s: str):
-    parts = [p.strip() for p in s.split(",") if p.strip()]
-    out = []
-    for p in parts:
-        try:
-            v = int(p)
-        except ValueError:
-            continue
-        if 1 <= v <= 12:
-            out.append(v)
-    seen = set()
-    uniq = []
-    for v in out:
-        if v not in seen:
-            seen.add(v)
-            uniq.append(v)
-    return uniq
-
-
-def validate_config(cfg: dict) -> dict:
-    # coerce + clamp lightly
-    cfg["runs"] = max(1, int(cfg.get("runs", DEFAULTS["runs"])))
-    cfg["target"] = int(cfg.get("target", DEFAULTS["target"]))
-    if cfg["target"] < 1: cfg["target"] = 1
-    if cfg["target"] > 12: cfg["target"] = 12
-
-    def clamp01(x):
-        try:
-            x = float(x)
-        except Exception:
-            return 0.0
-        return min(1.0, max(0.0, x))
-
-    cfg["inertia"] = clamp01(cfg.get("inertia", DEFAULTS["inertia"]))
-    cfg["novelty"] = clamp01(cfg.get("novelty", DEFAULTS["novelty"]))
-    cfg["steps"] = max(1, int(cfg.get("steps", DEFAULTS["steps"])))
-
-    # attractors
-    a = cfg.get("attractors", DEFAULTS["attractors"])
-    if isinstance(a, str):
-        a = parse_attractor_string(a)
-    if not isinstance(a, list):
-        a = []
-    a = [int(v) for v in a if 1 <= int(v) <= 12]
-    # unique
-    seen = set()
-    uniq = []
-    for v in a:
-        if v not in seen:
-            seen.add(v)
-            uniq.append(v)
-    cfg["attractors"] = uniq
-
-    cfg["attract_strength"] = clamp01(cfg.get("attract_strength", DEFAULTS["attract_strength"]))
-
-    def clamp(x, lo, hi, default):
-        try:
-            x = float(x)
-        except Exception:
-            return default
-        return min(hi, max(lo, x))
-
-    cfg["teleport_p"] = clamp(cfg.get("teleport_p", DEFAULTS["teleport_p"]), 0.0, 0.2, DEFAULTS["teleport_p"])
-    cfg["stay_p"] = clamp(cfg.get("stay_p", DEFAULTS["stay_p"]), 0.0, 0.5, DEFAULTS["stay_p"])
-
-    cfg["try_matplotlib"] = bool(cfg.get("try_matplotlib", DEFAULTS["try_matplotlib"]))
-    cfg["progress_every"] = max(1, int(cfg.get("progress_every", DEFAULTS["progress_every"])))
-
-    return cfg
-
-
 # ----------------------------
-# ASCII plotting
-# ----------------------------
-
-def ascii_hist(keys, counts_map, width=50, title=""):
-    vals = [counts_map.get(k, 0) for k in keys]
-    m = max(vals) if vals else 1
-    print("\n" + title)
-    for k in keys:
-        c = counts_map.get(k, 0)
-        bar_len = int((c / m) * width) if m > 0 else 0
-        bar = "█" * bar_len
-        print(f"{str(k):>3} | {bar:<{width}} {c}")
-
-
-# ----------------------------
-# Geometry helpers
-# ----------------------------
-
-def step_idx(i: int, move: int, n: int) -> int:
-    return (i + move) % n
-
-
-def dist_min_steps(n: int, i: int, j: int) -> int:
-    d = abs(j - i)
-    return min(d, n - d)
-
-
-def dist_clockwise(n: int, i: int, j: int) -> int:
-    return (j - i) % n
-
-
-# ----------------------------
-# Move rule with multimodal noise
-# ----------------------------
-
-def choose_move_multimodal(pos, last_move, labels, visited_set,
-                           inertia_p, novelty_bonus,
-                           attractors, attract_strength,
-                           stay_p, teleport_p):
-    n = len(labels)
-
-    # teleport
-    if teleport_p > 0 and random.random() < teleport_p:
-        return "TELEPORT"
-
-    # stay
-    if stay_p > 0 and random.random() < stay_p:
-        return 0
-
-    # inertia multiplier
-    if inertia_p == 0.5:
-        inertia_mult = 1.0
-    elif inertia_p == 1.0:
-        inertia_mult = 1e9
-    elif inertia_p == 0.0:
-        inertia_mult = 0.0
-    else:
-        inertia_mult = inertia_p / (1.0 - inertia_p)
-
-    weights = []
-    for mv in (-1, +1):
-        nxt = step_idx(pos, mv, n)
-        nxt_label = labels[nxt]
-        w = 1.0
-
-        if nxt_label not in visited_set:
-            w *= (1.0 + novelty_bonus)
-
-        if last_move is not None and mv == last_move:
-            w *= inertia_mult
-
-        # attractors: pull toward nearest attractor (distance-based)
-        if attractors:
-            cur_best = None
-            for a in attractors:
-                a_j = labels.index(a)
-                d = dist_min_steps(n, pos, a_j)
-                cur_best = d if cur_best is None else min(cur_best, d)
-
-            nxt_best = None
-            for a in attractors:
-                a_j = labels.index(a)
-                d = dist_min_steps(n, nxt, a_j)
-                nxt_best = d if nxt_best is None else min(nxt_best, d)
-
-            if nxt_best is not None and cur_best is not None:
-                if nxt_best < cur_best:
-                    w *= (1.0 + attract_strength)
-                elif nxt_best > cur_best:
-                    w *= (1.0 / (1.0 + attract_strength))
-
-        weights.append(w)
-
-    total = weights[0] + weights[1]
-    if total <= 0:
-        return random.choice([-1, +1])
-
-    r = random.random() * total
-    return -1 if r < weights[0] else +1
-
-
-def run_staleness_winner(labels, start_index,
-                         inertia_p, novelty_bonus,
-                         attractors, attract_strength,
-                         steps, stay_p, teleport_p):
-    n = len(labels)
-    pos = start_index
-    last_move = None
-
-    last_seen = {lab: None for lab in labels}
-    last_seen[labels[pos]] = 0
-    visited_set = {labels[pos]}
-
-    for t in range(1, steps + 1):
-        mv = choose_move_multimodal(
-            pos, last_move, labels, visited_set,
-            inertia_p, novelty_bonus,
-            attractors, attract_strength,
-            stay_p, teleport_p
-        )
-
-        if mv == "TELEPORT":
-            pos = random.randrange(n)
-            last_move = None
-        else:
-            pos = step_idx(pos, mv, n)
-            if mv in (-1, +1):
-                last_move = mv
-
-        v = labels[pos]
-        visited_set.add(v)
-        last_seen[v] = t
-
-    never = [lab for lab in labels if last_seen[lab] is None]
-    if never:
-        return random.choice(never)
-
-    max_stale = -1
-    winners = []
-    for lab in labels:
-        stale = steps - last_seen[lab]
-        if stale > max_stale:
-            max_stale = stale
-            winners = [lab]
-        elif stale == max_stale:
-            winners.append(lab)
-
-    return random.choice(winners)
-
-
-# ----------------------------
-# Progress spinner
-# ----------------------------
-
-SPIN = ["|", "/", "-", "\\"]
-
-def progress_update(i, total, phase, spin_idx, started_at):
-    pct = (i / total) * 100.0 if total else 100.0
-    elapsed = time.time() - started_at
-    # carriage return keeps it on one line
-    msg = f"\r{SPIN[spin_idx % len(SPIN)]} {phase} {pct:6.2f}%  (elapsed {elapsed:5.1f}s)"
-    print(msg, end="", flush=True)
-
-
-# ----------------------------
-# Optional matplotlib plots (no von Mises; no i0)
+# Optional matplotlib plots
 # ----------------------------
 
 def try_matplotlib_plots(labels, start_index, counts, title_prefix):
@@ -570,29 +226,29 @@ def try_matplotlib_plots(labels, start_index, counts, title_prefix):
         dmin = dist_min_steps(n, start_index, j)
         dist_counts[dmin] += c
 
-    ds = list(range(0, (n//2) + 1))
+    ds = list(range(0, (n // 2) + 1))
     hist = [dist_counts.get(d, 0) for d in ds]
 
     items = [(d, dist_counts[d]) for d in dist_counts if d != 0]
     tot = sum(w for _, w in items) or 1
-    mu = sum(d*w for d, w in items) / tot
+    mu = sum(d * w for d, w in items) / tot
     var = sum(((d - mu) ** 2) * w for d, w in items) / tot
     sigma = math.sqrt(var) if var > 1e-12 else 1e-6
 
     def normal_pdf(x):
-        return (1.0/(sigma*math.sqrt(2*math.pi))) * math.exp(-0.5*((x-mu)/sigma)**2)
+        return (1.0 / (sigma * math.sqrt(2 * math.pi))) * math.exp(-0.5 * ((x - mu) / sigma) ** 2)
 
-    curve_x = [x/50.0 for x in range(0, (n//2)*50 + 1)]
+    curve_x = [x / 50.0 for x in range(0, (n // 2) * 50 + 1)]
     curve_y = [normal_pdf(x) for x in curve_x]
     peak_hist = max(hist) if hist else 1
     peak_curve = max(curve_y) if curve_y else 1
-    scale = peak_hist/peak_curve if peak_curve > 0 else 1.0
-    curve_y = [y*scale for y in curve_y]
+    scale = peak_hist / peak_curve if peak_curve > 0 else 1.0
+    curve_y = [y * scale for y in curve_y]
 
     plt.figure()
     plt.bar(ds, hist)
     plt.plot(curve_x, curve_y)
-    plt.title(f"{title_prefix} — min distance (Normal μ={mu:.2f}, σ={sigma:.2f})")
+    plt.title(f"{title_prefix} — min distance (Normal \u03bc={mu:.2f}, \u03c3={sigma:.2f})")
     plt.xlabel("Min distance")
     plt.ylabel("Count")
     plt.xticks(ds)
@@ -649,33 +305,25 @@ def main():
     attract_strength = cfg["attract_strength"]
     teleport_p = cfg["teleport_p"]
     stay_p = cfg["stay_p"]
-    try_matplotlib = cfg["try_matplotlib"]
+    try_mpl = cfg["try_matplotlib"]
     progress_every = cfg["progress_every"]
 
     print("\nConfig loaded:")
     print(json.dumps(cfg, indent=2))
 
-    counts = Counter()
-
-    phase = "Simulating staleness-winner runs"
-    started_at = time.time()
-    spin_idx = 0
-
-    for i in range(1, runs + 1):
-        w = run_staleness_winner(
+    def trial():
+        return run_staleness_winner(
             labels, start_index,
             inertia, novelty,
             attractors, attract_strength,
             steps, stay_p, teleport_p
         )
-        counts[w] += 1
 
-        if i % progress_every == 0 or i == runs:
-            progress_update(i, runs, phase, spin_idx, started_at)
-            spin_idx += 1
-
-    # finish line
-    print("\r✔ Done. " + " " * 40)
+    counts = run_monte_carlo(
+        trial, runs,
+        progress_every=progress_every,
+        phase="Simulating staleness-winner runs",
+    )
 
     pct = 100.0 * counts.get(target, 0) / runs
 
@@ -700,7 +348,7 @@ def main():
         j = labels.index(lab)
         dmin = dist_min_steps(n, start_index, j)
         dist_counts[dmin] += c
-    ascii_hist(list(range(0, (n//2)+1)), dist_counts, title="ASCII — min distance histogram (0..6)")
+    ascii_hist(list(range(0, (n // 2) + 1)), dist_counts, title="ASCII — min distance histogram (0..6)")
 
     cw = defaultdict(int)
     for lab, c in counts.items():
@@ -709,11 +357,11 @@ def main():
         cw[cw_d] += c
     ascii_hist(list(range(0, n)), cw, title="ASCII — clockwise distance histogram (0..11)")
 
-    if try_matplotlib:
+    if try_mpl:
         try:
             try_matplotlib_plots(labels, start_index, counts, "Staleness winner")
         except Exception as e:
-            print("\n⚠️ Matplotlib plotting failed here.")
+            print("\n\u26a0\ufe0f Matplotlib plotting failed here.")
             print("Reason:", repr(e))
             print("ASCII plots above are the fallback.")
 
