@@ -55,261 +55,148 @@ def main():
     fig.savefig(png_path, dpi=150, bbox_inches="tight", facecolor="white")
     print(f"Image: {png_path}")
 
-    # Generate animated HTML player and static fallback
-    import base64
-    import json as _json
-
-    with open(png_path, "rb") as f:
-        img_b64 = base64.b64encode(f.read()).decode()
-
-    trace_json = _json.dumps(trace)
-    config_desc = cfg.get("_description", "")
-    config_name = os.path.basename(args.config)
-
-    html_path = os.path.join(args.output_dir, "index.html")
-    with open(html_path, "w") as f:
-        f.write(_build_animation_html(
-            trace_json, img_b64, config_desc, config_name,
-            args.mode, len(trace["frames"]), kwargs["steps"],
-            _format_config(trace["config"]),
-        ))
-    print(f"HTML:  {html_path}")
+    # Generate animated GIF
+    gif_path = os.path.join(args.output_dir, "clockwalk.gif")
+    _render_animated_gif(trace, gif_path)
+    print(f"GIF:   {gif_path}")
 
 
-def _build_animation_html(trace_json, img_b64, desc, config_name,
-                          mode, num_frames, steps, config_pre):
-    """Return a self-contained HTML string with an animated clock-walk player."""
-    return f"""\
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Clock Walk — {config_name}</title>
-<style>
-  * {{ box-sizing: border-box; }}
-  body {{ font-family: system-ui, sans-serif; max-width: 820px;
-         margin: 0 auto; padding: 1rem; background: #1a1a2e; color: #eee; }}
-  canvas {{ display: block; margin: 0 auto; border-radius: 8px;
-           background: #0f0f23; max-width: 100%; }}
-  .controls {{ display: flex; align-items: center; gap: 0.5rem;
-              justify-content: center; margin: 0.8rem 0; flex-wrap: wrap; }}
-  button {{ background: #16213e; color: #eee; border: 1px solid #444;
-           border-radius: 4px; padding: 0.4rem 1rem; cursor: pointer;
-           font-size: 0.95rem; }}
-  button:hover {{ background: #1a365d; }}
-  input[type=range] {{ flex: 1; min-width: 120px; max-width: 400px; }}
-  .info {{ font-size: 0.82rem; color: #aaa; text-align: center; }}
-  .desc {{ font-style: italic; color: #ccc; text-align: center; margin: 0.5rem 0; }}
-  .speed {{ font-size: 0.8rem; color: #aaa; min-width: 3em; text-align: center; }}
-  #fallback {{ display: none; width: 100%; border-radius: 8px; }}
-  pre  {{ background: #16213e; padding: 0.8rem; border-radius: 6px;
-          overflow-x: auto; font-size: 0.8rem; }}
-  details {{ margin-top: 0.8rem; font-size: 0.85rem; color: #aaa; }}
-</style>
-</head>
-<body>
-<h1 style="text-align:center; font-size:1.3rem;">Clock Walk Animation</h1>
-<p class="desc">{desc}</p>
-<canvas id="c" width="600" height="600"></canvas>
-<img id="fallback" src="data:image/png;base64,{img_b64}" alt="Clock walk static">
-<div class="controls">
-  <button id="play">Pause</button>
-  <button id="restart">Restart</button>
-  <input id="scrub" type="range" min="0" max="1" step="1" value="0">
-  <span id="counter" class="info">0 / 0</span>
-</div>
-<div class="controls">
-  <button id="slower">Slower</button>
-  <span id="speedLabel" class="speed">1x</span>
-  <button id="faster">Faster</button>
-</div>
-<div class="info">
-  Config: <code>{config_name}</code> &middot; Mode: <code>{mode}</code>
-  &middot; Frames: {num_frames} &middot; Steps: {steps}
-</div>
-<details><summary>Trace config</summary><pre>{config_pre}</pre></details>
+def _render_animated_gif(trace, gif_path, dpi=100, frame_ms=120, max_gif_frames=200):
+    """Render the trace as an animated GIF that plays on any device.
 
-<script>
-(function() {{
-  const TRACE = {trace_json};
-  const labels = TRACE.labels;
-  const frames = TRACE.frames;   // [step, posIndex, tagValue]
-  const config = TRACE.config;
-  const n = labels.length;
+    To keep file size reasonable, if the trace has more frames than
+    *max_gif_frames*, we sample evenly across the timeline.
+    """
+    import io
+    import math
+    import matplotlib.pyplot as plt
+    import matplotlib.patches as mpatches
+    from PIL import Image
 
-  const TAG_STYLE = {{
-    normal:           {{ color: "#888888", r: 3 }},
-    sample:           {{ color: "#4A90D9", r: 4 }},
-    first_visit:      {{ color: "#2ECC40", r: 6 }},
-    teleport:         {{ color: "#FF4136", r: 6 }},
-    reversal:         {{ color: "#FF851B", r: 5 }},
-    stay:             {{ color: "#B10DC9", r: 5 }},
-    attract_approach: {{ color: "#FFDC00", r: 5 }},
-  }};
+    from clockwalk.capture import EventTag
 
-  const canvas = document.getElementById("c");
-  const ctx = canvas.getContext("2d");
-  const W = canvas.width, H = canvas.height;
-  const cx = W / 2, cy = H / 2, ringR = W * 0.37;
+    labels = trace["labels"]
+    config = trace["config"]
+    frames = trace["frames"]
+    n = len(labels)
 
-  const scrub = document.getElementById("scrub");
-  const counter = document.getElementById("counter");
-  const playBtn = document.getElementById("play");
-  const speedLabel = document.getElementById("speedLabel");
-  scrub.max = Math.max(frames.length - 1, 0);
+    # Subsample frames if there are too many
+    if len(frames) > max_gif_frames:
+        indices = [int(i * (len(frames) - 1) / (max_gif_frames - 1))
+                   for i in range(max_gif_frames)]
+        sampled = [frames[i] for i in indices]
+    else:
+        sampled = list(frames)
 
-  let frameIdx = 0;
-  let playing = true;
-  let speed = 1;
-  const speeds = [0.25, 0.5, 1, 2, 4, 8];
-  let speedIdx = 2;
+    # Pre-compute angles
+    def label_angle(idx):
+        return math.pi / 2 - 2 * math.pi * idx / n
 
-  function labelAngle(i) {{
-    return Math.PI / 2 - 2 * Math.PI * i / n;
-  }}
+    angles = [label_angle(i) for i in range(n)]
+    ring_r = 1.0
+    label_r = 1.15
 
-  function drawRing() {{
-    ctx.clearRect(0, 0, W, H);
-    // ring
-    ctx.beginPath();
-    for (let i = 0; i <= n; i++) {{
-      const a = labelAngle(i % n);
-      const x = cx + ringR * Math.cos(a);
-      const y = cy - ringR * Math.sin(a);
-      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-    }}
-    ctx.strokeStyle = "#555";
-    ctx.lineWidth = 1;
-    ctx.stroke();
+    # Event tag colours
+    tag_style = {
+        EventTag.NORMAL.value:           {"color": "#888888", "s": 9},
+        EventTag.SAMPLE.value:           {"color": "#4A90D9", "s": 16},
+        EventTag.FIRST_VISIT.value:      {"color": "#2ECC40", "s": 50},
+        EventTag.TELEPORT.value:         {"color": "#FF4136", "s": 50},
+        EventTag.REVERSAL.value:         {"color": "#FF851B", "s": 36},
+        EventTag.STAY.value:             {"color": "#B10DC9", "s": 36},
+        EventTag.ATTRACT_APPROACH.value: {"color": "#FFDC00", "s": 36},
+    }
+    default_style = {"color": "#888888", "s": 9}
 
-    // labels
-    ctx.fillStyle = "#ddd";
-    ctx.font = "bold 16px system-ui, sans-serif";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    const lr = ringR * 1.14;
-    for (let i = 0; i < n; i++) {{
-      const a = labelAngle(i);
-      ctx.fillText(String(labels[i]), cx + lr * Math.cos(a), cy - lr * Math.sin(a));
-    }}
+    attractors = config.get("attractors", [])
+    pil_frames = []
 
-    // attractor circles
-    const att = config.attractors || [];
-    ctx.strokeStyle = "#FF4136";
-    ctx.lineWidth = 2;
-    att.forEach(v => {{
-      const idx = labels.indexOf(v);
-      if (idx < 0) return;
-      const a = labelAngle(idx);
-      ctx.beginPath();
-      ctx.arc(cx + ringR * Math.cos(a), cy - ringR * Math.sin(a), 12, 0, 2 * Math.PI);
-      ctx.stroke();
-    }});
-  }}
+    # Build the cumulative list of dots for each GIF frame
+    # Map sampled frames back to the original frame list for cumulative display
+    cumulative = []
+    orig_idx = 0
+    for si, sf in enumerate(sampled):
+        # Add all original frames up to and including this sampled frame
+        while orig_idx < len(frames) and frames[orig_idx] != sf:
+            cumulative.append(frames[orig_idx])
+            orig_idx += 1
+        if orig_idx < len(frames):
+            cumulative.append(frames[orig_idx])
+            orig_idx += 1
 
-  function drawDot(pos, tag, alpha) {{
-    const s = TAG_STYLE[tag] || TAG_STYLE.normal;
-    const a = labelAngle(pos);
-    const jitter = (Math.random() - 0.5) * 6;
-    const x = cx + (ringR + jitter) * Math.cos(a);
-    const y = cy - (ringR + jitter) * Math.sin(a);
-    ctx.globalAlpha = alpha;
-    ctx.beginPath();
-    ctx.arc(x, y, s.r * 1.3, 0, 2 * Math.PI);
-    ctx.fillStyle = s.color;
-    ctx.fill();
-    ctx.globalAlpha = 1;
-  }}
+        fig, ax = plt.subplots(figsize=(5, 5))
 
-  // Highlight the current position with a pulsing ring
-  function drawCursor(pos) {{
-    const a = labelAngle(pos);
-    const x = cx + ringR * Math.cos(a);
-    const y = cy - ringR * Math.sin(a);
-    ctx.beginPath();
-    ctx.arc(x, y, 16, 0, 2 * Math.PI);
-    ctx.strokeStyle = "#00e5ff";
-    ctx.lineWidth = 2.5;
-    ctx.stroke();
-  }}
+        # Draw ring
+        ring_x = [ring_r * math.cos(a) for a in angles]
+        ring_y = [ring_r * math.sin(a) for a in angles]
+        ax.plot(ring_x + [ring_x[0]], ring_y + [ring_y[0]],
+                color="#CCCCCC", linewidth=1, zorder=1)
 
-  function renderFrame(upTo) {{
-    drawRing();
-    // draw all previous dots with slight fade
-    for (let i = 0; i <= upTo; i++) {{
-      const [t, pos, tag] = frames[i];
-      const alpha = (i === upTo) ? 1.0 : Math.max(0.25, 1 - (upTo - i) / 60);
-      drawDot(pos, tag, alpha);
-    }}
-    // cursor on current
-    if (upTo >= 0 && upTo < frames.length) {{
-      drawCursor(frames[upTo][1]);
-    }}
-    counter.textContent = (upTo + 1) + " / " + frames.length;
-    scrub.value = upTo;
-  }}
+        # Draw labels
+        for i, lab in enumerate(labels):
+            lx = label_r * math.cos(angles[i])
+            ly = label_r * math.sin(angles[i])
+            ax.text(lx, ly, str(lab), ha="center", va="center",
+                    fontsize=11, fontweight="bold", zorder=5)
 
-  // Animation loop
-  let lastTime = 0;
-  const baseInterval = 120; // ms between frames at 1x
+        # Mark attractors
+        for a_val in attractors:
+            if a_val in labels:
+                idx = labels.index(a_val)
+                ax.plot(ring_x[idx], ring_y[idx], marker="o", markersize=16,
+                        markerfacecolor="none", markeredgecolor="#FF4136",
+                        markeredgewidth=2, zorder=3)
 
-  function tick(ts) {{
-    if (playing && frames.length > 0) {{
-      const interval = baseInterval / speed;
-      if (ts - lastTime >= interval) {{
-        lastTime = ts;
-        frameIdx++;
-        if (frameIdx >= frames.length) {{
-          frameIdx = frames.length - 1;
-          playing = false;
-          playBtn.textContent = "Play";
-        }}
-        renderFrame(frameIdx);
-      }}
-    }}
-    requestAnimationFrame(tick);
-  }}
+        # Plot all cumulative dots with fading
+        total = len(cumulative)
+        for di, (t, pos, tag_val) in enumerate(cumulative):
+            style = tag_style.get(tag_val, default_style)
+            a = angles[pos]
+            jitter = 0.02 * ((t % 5) - 2)
+            fx = (ring_r + jitter) * math.cos(a)
+            fy = (ring_r + jitter) * math.sin(a)
+            alpha = max(0.2, 1 - (total - 1 - di) / 40) if total > 1 else 1.0
+            ax.plot(fx, fy, marker="o", color=style["color"],
+                    markersize=max(3, style["s"] ** 0.5),
+                    alpha=alpha, zorder=4,
+                    markeredgecolor="black", markeredgewidth=0.3)
 
-  // Controls
-  playBtn.addEventListener("click", () => {{
-    if (frameIdx >= frames.length - 1) frameIdx = 0;
-    playing = !playing;
-    playBtn.textContent = playing ? "Pause" : "Play";
-  }});
-  document.getElementById("restart").addEventListener("click", () => {{
-    frameIdx = 0;
-    playing = true;
-    playBtn.textContent = "Pause";
-    renderFrame(0);
-  }});
-  scrub.addEventListener("input", () => {{
-    frameIdx = parseInt(scrub.value, 10);
-    renderFrame(frameIdx);
-  }});
-  document.getElementById("slower").addEventListener("click", () => {{
-    speedIdx = Math.max(0, speedIdx - 1);
-    speed = speeds[speedIdx];
-    speedLabel.textContent = speed + "x";
-  }});
-  document.getElementById("faster").addEventListener("click", () => {{
-    speedIdx = Math.min(speeds.length - 1, speedIdx + 1);
-    speed = speeds[speedIdx];
-    speedLabel.textContent = speed + "x";
-  }});
+        # Cursor on current position
+        cur_pos = sf[1]
+        ca = angles[cur_pos]
+        ax.plot(ring_r * math.cos(ca), ring_r * math.sin(ca),
+                marker="o", markersize=18,
+                markerfacecolor="none", markeredgecolor="#00e5ff",
+                markeredgewidth=2.5, zorder=6)
 
-  // Init
-  if (frames.length === 0) {{
-    document.getElementById("fallback").style.display = "block";
-    canvas.style.display = "none";
-  }} else {{
-    renderFrame(0);
-    requestAnimationFrame(tick);
-  }}
-}})();
-</script>
-</body>
-</html>"""
+        ax.set_xlim(-1.5, 1.5)
+        ax.set_ylim(-1.5, 1.5)
+        ax.set_aspect("equal")
+        ax.set_title(f"Clock Walk — frame {si + 1}/{len(sampled)}", fontsize=11)
+        ax.axis("off")
+        fig.tight_layout()
+
+        # Render to PIL Image
+        buf = io.BytesIO()
+        fig.savefig(buf, format="png", dpi=dpi, facecolor="white")
+        plt.close(fig)
+        buf.seek(0)
+        pil_frames.append(Image.open(buf).copy())
+
+    if not pil_frames:
+        return
+
+    # Hold on the last frame longer so it doesn't loop immediately
+    last_frame_ms = 2000
+    durations = [frame_ms] * (len(pil_frames) - 1) + [last_frame_ms]
+
+    pil_frames[0].save(
+        gif_path,
+        save_all=True,
+        append_images=pil_frames[1:],
+        duration=durations,
+        loop=0,
+    )
 
 
 def _format_config(config):
