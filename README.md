@@ -18,20 +18,20 @@ pip install clockwalk[plots]
 
 **From GitHub** (install directly from this repo):
 ```bash
-pip install git+https://github.com/rexdavid37/rexdavid37.git
+pip install git+https://github.com/clockwalk/clockwalk.git
 ```
 
 **In a requirements.txt** file, add one of:
 ```
 clockwalk                                              # from PyPI
 clockwalk[plots]                                       # from PyPI with matplotlib
-git+https://github.com/rexdavid37/rexdavid37.git      # from GitHub
+git+https://github.com/clockwalk/clockwalk.git         # from GitHub
 ```
 
 **For local development**:
 ```bash
-git clone https://github.com/rexdavid37/rexdavid37.git
-cd rexdavid37
+git clone https://github.com/clockwalk/clockwalk.git
+cd clockwalk
 pip install -e .
 ```
 
@@ -143,19 +143,27 @@ clockwalk/
     geometry.py     Discrete ring topology (step, distance)
     walk.py         Biased walk kernel + StalenessTracker
     config.py       Defaults, validation, data-file registry
+    capture.py      Frame capture modes (event, nth, full)
+    animate.py      Trace I/O + clock-face renderer
     viz.py          ASCII histogram rendering
     runner.py       Monte Carlo batch runner with progress
 ```
 
 ### Modules by Concern
 
-The five modules are grouped by cross-cutting concern so related
+The seven modules are grouped by cross-cutting concern so related
 functionality can be adopted together:
 
 **Simulation core** (`geometry` + `walk`)
 ```python
 from clockwalk.geometry import step_idx, dist_min_steps, dist_clockwise
 from clockwalk.walk import choose_move, StalenessTracker, run_staleness_winner
+```
+
+**Animation** (`capture` + `animate`)
+```python
+from clockwalk.capture import EventCapture, NthCapture, FullCapture, EventTag
+from clockwalk.animate import build_trace, write_trace, load_trace, render_clock_face
 ```
 
 **Configuration** (`config`)
@@ -234,6 +242,36 @@ cfg = load_config_from_file(path)
 print(cfg["stay_p"])  # 0.4
 ```
 
+**Capture and visualise an animation trace:**
+
+```python
+from clockwalk.animate import build_trace, write_trace, render_clock_face
+
+# Capture a single walk with event-driven sampling
+trace = build_trace(
+    mode="event",             # only record interesting state changes
+    inertia_p=0.7, novelty_bonus=0.2,
+    attractors=[6], attract_strength=0.8,
+    steps=1000, stay_p=0.02, teleport_p=0.002,
+)
+
+# Save trace for later replay
+write_trace(trace, "my_trace.json")
+
+# Render on a clock face (requires matplotlib)
+render_clock_face(trace)
+```
+
+Or from the command line:
+
+```bash
+# Capture a trace using a preset config
+python -m clockwalk.animate capture --config data/3_single_strong_attractor.json --mode event -o trace.json
+
+# Replay the trace
+python -m clockwalk.animate replay trace.json
+```
+
 **Use geometry helpers for any ring size:**
 
 ```python
@@ -251,8 +289,8 @@ staleness tracking, statistical distribution properties, data-file
 resolution, and library/script parity.
 
 ```bash
-# Run all 66 tests
-python test_clock_walk.py -v
+# Run all 100 tests
+python -m unittest test_clock_walk test_capture test_animate -v
 ```
 
 ### Test Classes
@@ -271,6 +309,14 @@ python test_clock_walk.py -v
 | `TestRunMonteCarlo` | 2 | Batch runner counting |
 | `TestDataFileResolution` | 7 | Index/name lookup, load all presets |
 | `TestLoadConfigFromFile` | 4 | Temp-file JSON loading |
+| `TestEventTag` | 2 | Enum completeness and uniqueness |
+| `TestFullCapture` | 3 | Full frame recording + clear |
+| `TestNthCapture` | 4 | Nth-step sampling + validation |
+| `TestEventCapture` | 8 | Event detection (teleport, reversal, etc.) |
+| `TestCaptureIntegration` | 5 | on_step callback with simulation |
+| `TestBackwardsCompatibility` | 1 | Positional args still work |
+| `TestTraceIO` | 5 | JSON round-trip for traces |
+| `TestBuildTrace` | 5 | Trace builder with all modes |
 
 ## Project Structure
 
@@ -282,9 +328,13 @@ python test_clock_walk.py -v
 │   ├── geometry.py        Ring topology: step, distance
 │   ├── walk.py            Walk kernel + StalenessTracker
 │   ├── config.py          Defaults, validation, data registry
+│   ├── capture.py         Frame capture modes (event, nth, full)
+│   ├── animate.py         Trace I/O + clock-face renderer
 │   ├── viz.py             ASCII histograms
 │   └── runner.py          Monte Carlo runner + progress
-├── test_clock_walk.py     Test suite (66 tests)
+├── test_clock_walk.py     Tests: core simulation (66 tests)
+├── test_capture.py        Tests: capture modes + integration (24 tests)
+├── test_animate.py        Tests: trace I/O + build_trace (10 tests)
 ├── data/                  Preset config files
 │   ├── 0_pure_random_baseline.json
 │   ├── 1_extreme_inertia.json
