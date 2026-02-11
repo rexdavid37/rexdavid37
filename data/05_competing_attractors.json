@@ -1,0 +1,14 @@
+{
+  "runs": 50000,
+  "target": 3,
+  "inertia": 0.5,
+  "novelty": 0.0,
+  "steps": 333,
+  "attractors": [3, 9],
+  "attract_strength": 0.9,
+  "teleport_p": 0.0,
+  "stay_p": 0.0,
+  "try_matplotlib": false,
+  "progress_every": 1000,
+  "_description": "Two attractors at diametrically opposed positions (3 and 9) compete for the walker. The walker oscillates between them, making positions equidistant from both attractors (12 and 6) the most neglected. Creates a bimodal staleness distribution with peaks at the midpoints between attractors."
+}

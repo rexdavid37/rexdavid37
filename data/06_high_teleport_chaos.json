@@ -1,0 +1,14 @@
+{
+  "runs": 50000,
+  "target": 6,
+  "inertia": 0.7,
+  "novelty": 0.2,
+  "steps": 333,
+  "attractors": [1, 6, 9],
+  "attract_strength": 0.8,
+  "teleport_p": 0.15,
+  "stay_p": 0.0,
+  "try_matplotlib": false,
+  "progress_every": 1000,
+  "_description": "High teleport probability (15%) overwhelms the attractor and inertia biases by constantly randomizing the walker's position. Despite having attractors and inertia configured, the distribution should approach near-uniform, showing how teleportation acts as a mixing force that erases spatial structure."
+}

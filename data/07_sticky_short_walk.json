@@ -1,0 +1,14 @@
+{
+  "runs": 50000,
+  "target": 6,
+  "inertia": 0.7,
+  "novelty": 0.0,
+  "steps": 100,
+  "attractors": [],
+  "attract_strength": 0.0,
+  "teleport_p": 0.0,
+  "stay_p": 0.45,
+  "try_matplotlib": false,
+  "progress_every": 1000,
+  "_description": "Very high stay probability (45%) combined with short walk (100 steps). The walker barely moves from its starting position at 12. Staleness winners will be heavily concentrated at distant positions (5, 6, 7) since the walker rarely reaches the far side. Demonstrates how stickiness creates extreme locality."
+}

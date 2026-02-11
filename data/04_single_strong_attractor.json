@@ -1,0 +1,14 @@
+{
+  "runs": 50000,
+  "target": 6,
+  "inertia": 0.5,
+  "novelty": 0.0,
+  "steps": 333,
+  "attractors": [6],
+  "attract_strength": 0.95,
+  "teleport_p": 0.0,
+  "stay_p": 0.0,
+  "try_matplotlib": false,
+  "progress_every": 1000,
+  "_description": "A single powerful attractor at position 6 (opposite the start). The walker is pulled toward 6 and spends most of its time there, making positions far from 6 (near 12) the staleness winners. Demonstrates how a single attractor warps the entire distribution."
+}

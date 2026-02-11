@@ -1,0 +1,14 @@
+{
+  "runs": 50000,
+  "target": 6,
+  "inertia": 0.5,
+  "novelty": 0.95,
+  "steps": 50,
+  "attractors": [],
+  "attract_strength": 0.0,
+  "teleport_p": 0.0,
+  "stay_p": 0.0,
+  "try_matplotlib": false,
+  "progress_every": 1000,
+  "_description": "Strong novelty drive with very few steps. The walker aggressively seeks unvisited positions but runs out of time before covering the full clock. This creates a staleness distribution peaked at positions far from the start (around 6), since the walker fans out but cannot reach the opposite side in only 50 steps."
+}

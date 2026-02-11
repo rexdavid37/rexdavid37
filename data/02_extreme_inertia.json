@@ -1,0 +1,14 @@
+{
+  "runs": 50000,
+  "target": 6,
+  "inertia": 0.98,
+  "novelty": 0.0,
+  "steps": 333,
+  "attractors": [],
+  "attract_strength": 0.0,
+  "teleport_p": 0.0,
+  "stay_p": 0.0,
+  "try_matplotlib": false,
+  "progress_every": 1000,
+  "_description": "Near-ballistic walk: the walker almost always continues in the same direction. This creates a tight concentration of staleness winners near the start position (12), since the walker sweeps through most of the clock and the positions just behind the start become the most forgotten."
+}

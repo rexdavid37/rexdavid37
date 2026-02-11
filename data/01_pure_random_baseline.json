@@ -1,0 +1,14 @@
+{
+  "runs": 50000,
+  "target": 6,
+  "inertia": 0.5,
+  "novelty": 0.0,
+  "steps": 333,
+  "attractors": [],
+  "attract_strength": 0.0,
+  "teleport_p": 0.0,
+  "stay_p": 0.0,
+  "try_matplotlib": false,
+  "progress_every": 1000,
+  "_description": "Pure symmetric random walk with no biases. Inertia 0.5 means equal probability of stepping clockwise or counterclockwise. The staleness-winner distribution should be nearly uniform across all 12 positions, serving as a null-hypothesis baseline."
+}

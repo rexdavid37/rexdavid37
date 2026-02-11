@@ -1,0 +1,14 @@
+{
+  "runs": 50000,
+  "target": 12,
+  "inertia": 0.95,
+  "novelty": 0.0,
+  "steps": 333,
+  "attractors": [12],
+  "attract_strength": 0.95,
+  "teleport_p": 0.0,
+  "stay_p": 0.0,
+  "try_matplotlib": false,
+  "progress_every": 1000,
+  "_description": "Inertia and attractor pull in opposite directions. High inertia drives the walker to keep going (sweep the clock), but the strong attractor at 12 (the start) tries to pull it back. This tug-of-war creates a complex distribution where the walker gets stuck in short orbits near 12, leaving mid-range positions (3-5, 7-9) as the most stale."
+}

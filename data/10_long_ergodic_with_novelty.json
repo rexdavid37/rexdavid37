@@ -1,0 +1,14 @@
+{
+  "runs": 50000,
+  "target": 6,
+  "inertia": 0.7,
+  "novelty": 0.8,
+  "steps": 5000,
+  "attractors": [4, 8],
+  "attract_strength": 0.5,
+  "teleport_p": 0.005,
+  "stay_p": 0.02,
+  "try_matplotlib": false,
+  "progress_every": 2000,
+  "_description": "Long walk (5000 steps) with all biases active at moderate levels. With enough steps, even biased walks become somewhat ergodic — every position gets visited many times. The staleness winner becomes determined by subtle timing differences in the final steps rather than gross coverage gaps. Distribution should be more uniform than short walks but still show structure from the attractors at 4 and 8."
+}

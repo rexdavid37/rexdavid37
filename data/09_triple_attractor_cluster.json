@@ -1,0 +1,14 @@
+{
+  "runs": 50000,
+  "target": 8,
+  "inertia": 0.6,
+  "novelty": 0.1,
+  "steps": 500,
+  "attractors": [1, 2, 3],
+  "attract_strength": 0.85,
+  "teleport_p": 0.0,
+  "stay_p": 0.0,
+  "try_matplotlib": false,
+  "progress_every": 1000,
+  "_description": "Three adjacent attractors clustered at 1-2-3 create a gravity well on one side of the clock. The walker gets trapped in this region, leaving the opposite arc (7, 8, 9) consistently stale. Demonstrates asymmetric attractor placement producing a lopsided staleness distribution with a clear peak opposite the cluster."
+}
