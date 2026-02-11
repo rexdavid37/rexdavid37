@@ -26,6 +26,8 @@ from clockwalk.config import (
 )
 from clockwalk.viz import ascii_hist
 from clockwalk.runner import run_monte_carlo, progress_update
+from clockwalk.capture import EventTag, FullCapture, NthCapture, EventCapture
+from clockwalk.animate import write_trace, load_trace, build_trace
 
 __all__ = [
     # geometry
@@ -40,4 +42,8 @@ __all__ = [
     "ascii_hist",
     # runner
     "run_monte_carlo", "progress_update",
+    # capture
+    "EventTag", "FullCapture", "NthCapture", "EventCapture",
+    # animate
+    "write_trace", "load_trace", "build_trace",
 ]

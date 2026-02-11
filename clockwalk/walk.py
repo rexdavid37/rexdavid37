@@ -146,9 +146,20 @@ class StalenessTracker:
 def run_staleness_winner(labels, start_index,
                          inertia_p, novelty_bonus,
                          attractors, attract_strength,
-                         steps, stay_p, teleport_p):
+                         steps, stay_p, teleport_p,
+                         on_step=None):
     """
     Run one walk trial and return the label that was most stale at the end.
+
+    Parameters
+    ----------
+    on_step : callable or None
+        Optional callback invoked after each step with the signature
+        ``on_step(t, pos, move, label, last_move, visited_set, tracker)``.
+        When *None* (the default) no callback overhead is incurred.
+        The *visited_set* passed to the callback reflects the state
+        **before** the current label is added, so that the callback can
+        detect first visits.
     """
     n = len(labels)
     pos = start_index
@@ -166,6 +177,8 @@ def run_staleness_winner(labels, start_index,
             stay_p, teleport_p
         )
 
+        prev_last_move = last_move
+
         if mv == "TELEPORT":
             pos = random.randrange(n)
             last_move = None
@@ -175,6 +188,10 @@ def run_staleness_winner(labels, start_index,
                 last_move = mv
 
         v = labels[pos]
+
+        if on_step is not None:
+            on_step(t, pos, mv, v, prev_last_move, visited_set, tracker)
+
         visited_set.add(v)
         tracker.visit(v, t)
 
