@@ -39,67 +39,67 @@
     ],
     [
       3,
-      1,
-      "reversal"
-    ],
-    [
-      4,
-      0,
-      "attract_approach"
-    ],
-    [
-      5,
-      11,
-      "first_visit"
-    ],
-    [
-      6,
-      10,
-      "first_visit"
-    ],
-    [
-      7,
-      9,
-      "first_visit"
-    ],
-    [
-      8,
-      8,
-      "first_visit"
-    ],
-    [
-      9,
-      7,
-      "first_visit"
-    ],
-    [
-      10,
-      6,
-      "first_visit"
-    ],
-    [
-      11,
-      5,
-      "first_visit"
-    ],
-    [
-      12,
-      4,
-      "first_visit"
-    ],
-    [
-      13,
       3,
       "first_visit"
     ],
     [
-      14,
+      4,
+      4,
+      "first_visit"
+    ],
+    [
+      5,
+      5,
+      "first_visit"
+    ],
+    [
+      6,
+      4,
+      "reversal"
+    ],
+    [
+      7,
+      3,
+      "attract_approach"
+    ],
+    [
+      8,
       2,
       "attract_approach"
     ],
     [
-      15,
+      9,
       1,
+      "attract_approach"
+    ],
+    [
+      10,
+      0,
+      "attract_approach"
+    ],
+    [
+      11,
+      11,
+      "first_visit"
+    ],
+    [
+      12,
+      10,
+      "first_visit"
+    ],
+    [
+      13,
+      9,
+      "first_visit"
+    ],
+    [
+      14,
+      10,
+      "reversal"
+    ],
+    [
+      15,
+      11,
       "attract_approach"
     ],
     [
@@ -108,624 +108,649 @@
       "attract_approach"
     ],
     [
+      22,
+      6,
+      "first_visit"
+    ],
+    [
       23,
-      5,
-      "attract_approach"
+      7,
+      "first_visit"
     ],
     [
       24,
-      4,
-      "attract_approach"
+      8,
+      "first_visit"
     ],
     [
       25,
-      3,
+      9,
       "attract_approach"
     ],
     [
       26,
-      2,
+      10,
       "attract_approach"
     ],
     [
       27,
-      1,
+      11,
       "attract_approach"
     ],
     [
       28,
+      10,
+      "reversal"
+    ],
+    [
+      29,
+      11,
+      "reversal"
+    ],
+    [
+      30,
       0,
       "attract_approach"
     ],
     [
       35,
-      5,
-      "attract_approach"
+      3,
+      "reversal"
     ],
     [
       36,
-      4,
+      2,
       "attract_approach"
     ],
     [
       37,
-      3,
+      1,
       "attract_approach"
     ],
     [
       38,
-      2,
-      "attract_approach"
-    ],
-    [
-      39,
-      1,
-      "attract_approach"
-    ],
-    [
-      40,
       0,
       "attract_approach"
     ],
     [
-      47,
-      5,
+      42,
+      10,
+      "reversal"
+    ],
+    [
+      43,
+      11,
       "attract_approach"
     ],
     [
-      48,
-      4,
-      "attract_approach"
-    ],
-    [
-      49,
-      3,
-      "attract_approach"
-    ],
-    [
-      50,
-      2,
+      44,
+      0,
       "attract_approach"
     ],
     [
       51,
-      1,
+      7,
       "attract_approach"
     ],
     [
       52,
+      8,
+      "attract_approach"
+    ],
+    [
+      53,
+      9,
+      "attract_approach"
+    ],
+    [
+      54,
+      10,
+      "attract_approach"
+    ],
+    [
+      55,
+      11,
+      "attract_approach"
+    ],
+    [
+      56,
       0,
-      "attract_approach"
-    ],
-    [
-      59,
-      5,
-      "attract_approach"
-    ],
-    [
-      60,
-      4,
-      "attract_approach"
-    ],
-    [
-      61,
-      3,
-      "attract_approach"
-    ],
-    [
-      62,
-      2,
       "attract_approach"
     ],
     [
       63,
-      1,
+      7,
       "attract_approach"
     ],
     [
       64,
-      0,
+      8,
       "attract_approach"
     ],
     [
-      67,
-      11,
+      65,
+      9,
+      "attract_approach"
+    ],
+    [
+      66,
+      8,
       "reversal"
     ],
     [
       68,
-      0,
+      8,
+      "reversal"
+    ],
+    [
+      69,
+      9,
       "attract_approach"
     ],
     [
-      75,
-      7,
+      70,
+      10,
+      "attract_approach"
+    ],
+    [
+      71,
+      11,
+      "attract_approach"
+    ],
+    [
+      72,
+      0,
       "attract_approach"
     ],
     [
       76,
-      8,
-      "attract_approach"
+      2,
+      "reversal"
     ],
     [
       77,
-      9,
+      1,
       "attract_approach"
     ],
     [
       78,
-      10,
-      "attract_approach"
-    ],
-    [
-      79,
-      11,
-      "attract_approach"
-    ],
-    [
-      80,
       0,
       "attract_approach"
     ],
     [
-      83,
+      81,
+      11,
+      "reversal"
+    ],
+    [
+      82,
+      0,
+      "attract_approach"
+    ],
+    [
+      85,
       1,
       "reversal"
     ],
     [
-      84,
+      86,
       0,
-      "attract_approach"
-    ],
-    [
-      91,
-      5,
-      "attract_approach"
-    ],
-    [
-      92,
-      4,
       "attract_approach"
     ],
     [
       93,
-      3,
+      5,
       "attract_approach"
     ],
     [
       94,
-      2,
+      4,
       "attract_approach"
     ],
     [
       95,
-      1,
+      3,
       "attract_approach"
     ],
     [
       96,
-      0,
-      "attract_approach"
-    ],
-    [
-      99,
-      11,
-      "reversal"
-    ],
-    [
-      100,
-      0,
-      "attract_approach"
-    ],
-    [
-      105,
-      3,
-      "reversal"
-    ],
-    [
-      106,
       2,
       "attract_approach"
     ],
     [
-      107,
+      97,
       1,
       "attract_approach"
     ],
     [
-      108,
+      98,
       0,
       "attract_approach"
     ],
     [
-      111,
-      11,
+      103,
+      9,
       "reversal"
     ],
     [
-      112,
-      0,
-      "attract_approach"
-    ],
-    [
-      119,
-      7,
-      "attract_approach"
-    ],
-    [
-      120,
-      8,
-      "attract_approach"
-    ],
-    [
-      121,
-      9,
-      "attract_approach"
-    ],
-    [
-      122,
+      104,
       10,
       "attract_approach"
     ],
     [
-      123,
+      105,
       11,
       "attract_approach"
     ],
     [
-      124,
+      106,
       0,
       "attract_approach"
     ],
     [
-      126,
-      0,
+      109,
+      1,
       "reversal"
     ],
     [
+      110,
+      0,
+      "attract_approach"
+    ],
+    [
+      113,
+      11,
+      "reversal"
+    ],
+    [
+      114,
+      0,
+      "attract_approach"
+    ],
+    [
+      117,
+      1,
+      "reversal"
+    ],
+    [
+      118,
+      0,
+      "attract_approach"
+    ],
+    [
+      125,
+      5,
+      "attract_approach"
+    ],
+    [
+      126,
+      4,
+      "attract_approach"
+    ],
+    [
+      127,
+      3,
+      "attract_approach"
+    ],
+    [
       128,
+      2,
+      "attract_approach"
+    ],
+    [
+      129,
+      1,
+      "attract_approach"
+    ],
+    [
+      130,
+      0,
+      "attract_approach"
+    ],
+    [
+      132,
       0,
       "reversal"
     ],
     [
       135,
-      7,
-      "attract_approach"
+      1,
+      "reversal"
     ],
     [
       136,
-      8,
-      "attract_approach"
-    ],
-    [
-      137,
-      9,
-      "attract_approach"
-    ],
-    [
-      138,
-      10,
-      "attract_approach"
-    ],
-    [
-      139,
-      11,
-      "attract_approach"
-    ],
-    [
-      140,
       0,
       "attract_approach"
     ],
     [
+      143,
+      5,
+      "attract_approach"
+    ],
+    [
+      144,
+      4,
+      "attract_approach"
+    ],
+    [
+      145,
+      3,
+      "attract_approach"
+    ],
+    [
+      146,
+      2,
+      "attract_approach"
+    ],
+    [
       147,
-      7,
+      1,
       "attract_approach"
     ],
     [
       148,
-      8,
+      0,
       "attract_approach"
     ],
     [
       149,
-      9,
+      1,
+      "reversal"
+    ],
+    [
+      153,
+      3,
+      "reversal"
+    ],
+    [
+      154,
+      2,
       "attract_approach"
     ],
     [
-      150,
-      10,
+      155,
+      1,
       "attract_approach"
     ],
     [
-      151,
-      11,
-      "attract_approach"
-    ],
-    [
-      152,
+      156,
       0,
       "attract_approach"
     ],
     [
       159,
+      11,
+      "reversal"
+    ],
+    [
+      160,
+      0,
+      "attract_approach"
+    ],
+    [
+      167,
       7,
       "attract_approach"
     ],
     [
-      160,
+      168,
       8,
       "attract_approach"
     ],
     [
-      161,
+      169,
       9,
       "attract_approach"
     ],
     [
-      162,
+      170,
       10,
       "attract_approach"
     ],
     [
-      163,
-      11,
-      "attract_approach"
-    ],
-    [
-      164,
-      0,
-      "attract_approach"
-    ],
-    [
-      170,
-      4,
-      "reversal"
-    ],
-    [
       171,
-      3,
+      11,
       "attract_approach"
     ],
     [
       172,
-      2,
-      "attract_approach"
-    ],
-    [
-      173,
-      1,
-      "attract_approach"
-    ],
-    [
-      174,
       0,
       "attract_approach"
     ],
     [
-      177,
-      11,
-      "reversal"
+      179,
+      7,
+      "attract_approach"
     ],
     [
-      178,
-      0,
+      180,
+      8,
       "attract_approach"
     ],
     [
       181,
-      1,
-      "reversal"
-    ],
-    [
-      182,
-      0,
+      9,
       "attract_approach"
     ],
     [
-      185,
-      11,
-      "reversal"
+      182,
+      10,
+      "attract_approach"
     ],
     [
-      186,
+      183,
+      11,
+      "attract_approach"
+    ],
+    [
+      184,
       0,
       "attract_approach"
     ],
     [
       188,
-      0,
+      2,
       "reversal"
     ],
     [
-      195,
-      5,
-      "attract_approach"
-    ],
-    [
-      196,
-      4,
-      "attract_approach"
-    ],
-    [
-      197,
-      3,
-      "attract_approach"
-    ],
-    [
-      198,
-      2,
-      "attract_approach"
-    ],
-    [
-      199,
+      189,
       1,
       "attract_approach"
     ],
     [
-      200,
+      190,
       0,
+      "attract_approach"
+    ],
+    [
+      197,
+      5,
+      "attract_approach"
+    ],
+    [
+      198,
+      4,
+      "attract_approach"
+    ],
+    [
+      199,
+      3,
+      "attract_approach"
+    ],
+    [
+      200,
+      2,
+      "attract_approach"
+    ],
+    [
+      201,
+      1,
       "attract_approach"
     ],
     [
       202,
       0,
-      "reversal"
-    ],
-    [
-      204,
-      0,
-      "reversal"
-    ],
-    [
-      208,
-      10,
-      "reversal"
+      "attract_approach"
     ],
     [
       209,
-      11,
+      5,
       "attract_approach"
     ],
     [
       210,
+      4,
+      "attract_approach"
+    ],
+    [
+      211,
+      3,
+      "attract_approach"
+    ],
+    [
+      212,
+      2,
+      "attract_approach"
+    ],
+    [
+      213,
+      1,
+      "attract_approach"
+    ],
+    [
+      214,
       0,
       "attract_approach"
     ],
     [
-      217,
-      7,
-      "attract_approach"
-    ],
-    [
       218,
-      8,
-      "attract_approach"
+      10,
+      "reversal"
     ],
     [
       219,
-      9,
+      11,
       "attract_approach"
     ],
     [
       220,
-      10,
-      "attract_approach"
-    ],
-    [
-      221,
-      11,
+      0,
       "attract_approach"
     ],
     [
       222,
       0,
-      "attract_approach"
-    ],
-    [
-      224,
-      0,
       "reversal"
     ],
     [
-      231,
-      5,
+      225,
+      11,
+      "reversal"
+    ],
+    [
+      226,
+      0,
       "attract_approach"
     ],
     [
-      232,
-      4,
-      "attract_approach"
+      227,
+      11,
+      "reversal"
     ],
     [
       233,
-      3,
+      5,
       "attract_approach"
     ],
     [
       234,
-      2,
+      4,
       "attract_approach"
     ],
     [
       235,
-      1,
+      3,
       "attract_approach"
     ],
     [
       236,
+      2,
+      "attract_approach"
+    ],
+    [
+      237,
+      1,
+      "attract_approach"
+    ],
+    [
+      238,
       0,
-      "attract_approach"
-    ],
-    [
-      243,
-      5,
-      "attract_approach"
-    ],
-    [
-      244,
-      4,
       "attract_approach"
     ],
     [
       245,
-      3,
-      "attract_approach"
-    ],
-    [
-      246,
-      2,
-      "attract_approach"
-    ],
-    [
-      247,
-      1,
-      "attract_approach"
-    ],
-    [
-      248,
-      0,
-      "attract_approach"
-    ],
-    [
-      255,
       5,
       "attract_approach"
     ],
     [
-      256,
+      246,
       4,
       "attract_approach"
     ],
     [
-      257,
+      247,
       3,
       "attract_approach"
     ],
     [
-      258,
+      248,
       2,
       "attract_approach"
     ],
     [
-      259,
+      249,
       1,
       "attract_approach"
     ],
     [
-      260,
+      250,
       0,
+      "attract_approach"
+    ],
+    [
+      257,
+      5,
+      "attract_approach"
+    ],
+    [
+      258,
+      4,
+      "attract_approach"
+    ],
+    [
+      259,
+      3,
+      "attract_approach"
+    ],
+    [
+      260,
+      2,
+      "attract_approach"
+    ],
+    [
+      261,
+      1,
       "attract_approach"
     ],
     [
       262,
       0,
-      "reversal"
+      "attract_approach"
     ],
     [
       269,
       7,
-      "attract_approach"
+      "reversal"
     ],
     [
       270,
@@ -753,104 +778,99 @@
       "attract_approach"
     ],
     [
-      275,
-      11,
-      "reversal"
-    ],
-    [
-      279,
-      9,
-      "reversal"
-    ],
-    [
-      280,
-      10,
-      "attract_approach"
-    ],
-    [
       281,
-      11,
+      7,
       "attract_approach"
     ],
     [
       282,
+      8,
+      "attract_approach"
+    ],
+    [
+      283,
+      9,
+      "attract_approach"
+    ],
+    [
+      284,
+      10,
+      "attract_approach"
+    ],
+    [
+      285,
+      11,
+      "attract_approach"
+    ],
+    [
+      286,
       0,
       "attract_approach"
     ],
     [
       289,
-      7,
-      "attract_approach"
-    ],
-    [
-      290,
-      8,
-      "attract_approach"
-    ],
-    [
-      291,
-      9,
-      "attract_approach"
-    ],
-    [
-      292,
-      10,
-      "attract_approach"
-    ],
-    [
-      293,
-      11,
-      "attract_approach"
-    ],
-    [
-      294,
-      0,
-      "attract_approach"
-    ],
-    [
-      301,
-      7,
-      "attract_approach"
-    ],
-    [
-      302,
-      8,
-      "attract_approach"
-    ],
-    [
-      303,
-      9,
-      "attract_approach"
-    ],
-    [
-      304,
-      10,
-      "attract_approach"
-    ],
-    [
-      305,
-      11,
-      "attract_approach"
-    ],
-    [
-      306,
-      0,
-      "attract_approach"
-    ],
-    [
-      309,
       1,
       "reversal"
     ],
     [
-      310,
+      290,
       0,
       "attract_approach"
     ],
     [
-      313,
-      11,
+      297,
+      5,
+      "attract_approach"
+    ],
+    [
+      298,
+      4,
+      "attract_approach"
+    ],
+    [
+      299,
+      3,
+      "attract_approach"
+    ],
+    [
+      300,
+      2,
+      "attract_approach"
+    ],
+    [
+      301,
+      1,
+      "attract_approach"
+    ],
+    [
+      302,
+      0,
+      "attract_approach"
+    ],
+    [
+      306,
+      10,
       "reversal"
+    ],
+    [
+      307,
+      11,
+      "attract_approach"
+    ],
+    [
+      308,
+      0,
+      "attract_approach"
+    ],
+    [
+      312,
+      2,
+      "reversal"
+    ],
+    [
+      313,
+      1,
+      "attract_approach"
     ],
     [
       314,
@@ -859,27 +879,27 @@
     ],
     [
       321,
-      7,
+      5,
       "attract_approach"
     ],
     [
       322,
-      8,
+      4,
       "attract_approach"
     ],
     [
       323,
-      9,
+      3,
       "attract_approach"
     ],
     [
       324,
-      10,
+      2,
       "attract_approach"
     ],
     [
       325,
-      11,
+      1,
       "attract_approach"
     ],
     [
@@ -888,19 +908,14 @@
       "attract_approach"
     ],
     [
-      330,
-      2,
+      328,
+      0,
       "reversal"
     ],
     [
-      331,
-      1,
-      "attract_approach"
-    ],
-    [
-      332,
+      330,
       0,
-      "attract_approach"
+      "reversal"
     ]
   ]
 }
