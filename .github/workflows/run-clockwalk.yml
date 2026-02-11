@@ -37,7 +37,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
-        run: pip install matplotlib Pillow
+        run: pip install matplotlib
 
       - name: Resolve config file
         id: config
@@ -73,7 +73,6 @@ jobs:
           mkdir -p traces
           cp output/trace.json "traces/${{ steps.config.outputs.name }}.json"
           cp output/clockwalk.png "traces/${{ steps.config.outputs.name }}.png"
-          cp output/clockwalk.gif "traces/${{ steps.config.outputs.name }}.gif"
           git add traces/
           git diff --cached --quiet && echo "No changes to commit" || \
             git commit -m "Add trace: ${{ steps.config.outputs.name }} (${{ github.event.inputs.capture_mode }} mode)"
