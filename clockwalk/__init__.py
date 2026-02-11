@@ -10,6 +10,8 @@ viz        Terminal-based histogram rendering.
 runner     Monte Carlo batch runner with progress display.
 """
 
+__version__ = "0.1.0"
+
 from clockwalk.geometry import step_idx, dist_min_steps, dist_clockwise
 from clockwalk.walk import choose_move, StalenessTracker, run_staleness_winner
 from clockwalk.config import (

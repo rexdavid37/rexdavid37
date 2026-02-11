@@ -6,6 +6,35 @@ under the influence of five competing bias channels — inertia, novelty,
 attractors, teleportation, and stickiness — then the simulation reports
 which position went the longest without being visited ("staleness winner").
 
+## Installation
+
+**From PyPI** (once published):
+```bash
+pip install clockwalk
+
+# With matplotlib support
+pip install clockwalk[plots]
+```
+
+**From GitHub** (install directly from this repo):
+```bash
+pip install git+https://github.com/rexdavid37/rexdavid37.git
+```
+
+**In a requirements.txt** file, add one of:
+```
+clockwalk                                              # from PyPI
+clockwalk[plots]                                       # from PyPI with matplotlib
+git+https://github.com/rexdavid37/rexdavid37.git      # from GitHub
+```
+
+**For local development**:
+```bash
+git clone https://github.com/rexdavid37/rexdavid37.git
+cd rexdavid37
+pip install -e .
+```
+
 ## Quick Start
 
 ```bash
@@ -20,6 +49,9 @@ python clock_walk.py --list
 
 # Interactive mode (prompts or paste JSON)
 python clock_walk.py
+
+# If installed via pip, you can also use the entry point:
+clockwalk --list
 ```
 
 ## How It Works
