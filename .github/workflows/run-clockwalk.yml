@@ -1,0 +1,79 @@
+name: Run Clock Walk Simulation
+
+on:
+  workflow_dispatch:
+    inputs:
+      config:
+        description: "Preset config index (0-9) or filename"
+        required: false
+        default: "7"
+      capture_mode:
+        description: "Capture mode"
+        required: false
+        default: "event"
+        type: choice
+        options:
+          - event
+          - full
+          - nth
+      steps_override:
+        description: "Override step count (blank = use config default)"
+        required: false
+        default: ""
+
+jobs:
+  simulate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install matplotlib
+
+      - name: Resolve config file
+        id: config
+        run: |
+          python -c "
+          import sys, os
+          sys.path.insert(0, '.')
+          from clockwalk.config import resolve_data_file
+          path = resolve_data_file('${{ github.event.inputs.config }}')
+          name = os.path.splitext(os.path.basename(path))[0]
+          print(f'path={path}')
+          print(f'name={name}')
+          " >> "$GITHUB_OUTPUT"
+
+      - name: Run simulation and render
+        run: |
+          python scripts/render_trace.py \
+            --config "${{ steps.config.outputs.path }}" \
+            --mode "${{ github.event.inputs.capture_mode }}" \
+            ${{ github.event.inputs.steps_override != '' && format('--steps {0}', github.event.inputs.steps_override) || '' }} \
+            --output-dir output
+
+      - name: Upload trace artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: clockwalk-${{ steps.config.outputs.name }}
+          path: output/
+
+      - name: Commit trace to repo
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          mkdir -p traces
+          cp output/trace.json "traces/${{ steps.config.outputs.name }}.json"
+          cp output/clockwalk.png "traces/${{ steps.config.outputs.name }}.png"
+          git add traces/
+          git diff --cached --quiet && echo "No changes to commit" || \
+            git commit -m "Add trace: ${{ steps.config.outputs.name }} (${{ github.event.inputs.capture_mode }} mode)"
+          git push
