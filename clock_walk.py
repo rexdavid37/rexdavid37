@@ -2,6 +2,9 @@ import random
 import math
 import json
 import time
+import sys
+import os
+import glob as globmod
 from collections import Counter, defaultdict
 
 
@@ -22,6 +25,101 @@ DEFAULTS = {
     "try_matplotlib": False,
     "progress_every": 500,     # update spinner every N runs
 }
+
+
+# ----------------------------
+# Data file resolution
+# ----------------------------
+
+def get_data_dir():
+    """Return the path to the data/ folder next to this script."""
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
+
+
+def list_data_files():
+    """Return sorted list of (index, filename, full_path) for all JSON files in data/."""
+    data_dir = get_data_dir()
+    if not os.path.isdir(data_dir):
+        return []
+    files = sorted(globmod.glob(os.path.join(data_dir, "*.json")))
+    result = []
+    for fpath in files:
+        fname = os.path.basename(fpath)
+        # extract leading integer index from filename like "0_pure_random_baseline.json"
+        parts = fname.split("_", 1)
+        try:
+            idx = int(parts[0])
+        except ValueError:
+            idx = None
+        result.append((idx, fname, fpath))
+    return result
+
+
+def resolve_data_file(arg: str):
+    """
+    Resolve a CLI argument to a data file path.
+    Accepts:
+      - An integer index (e.g. "0", "3", "9")
+      - A substring of a filename (e.g. "sticky", "attractor")
+      - An exact filename (e.g. "0_pure_random_baseline.json")
+    Returns the full path, or None if not found.
+    """
+    entries = list_data_files()
+    if not entries:
+        return None
+
+    # try as integer index
+    try:
+        idx = int(arg)
+        for entry_idx, fname, fpath in entries:
+            if entry_idx == idx:
+                return fpath
+        return None
+    except ValueError:
+        pass
+
+    # try exact filename match
+    for _, fname, fpath in entries:
+        if fname == arg:
+            return fpath
+
+    # try substring match (case-insensitive)
+    arg_lower = arg.lower()
+    matches = [(fname, fpath) for _, fname, fpath in entries if arg_lower in fname.lower()]
+    if len(matches) == 1:
+        return matches[0][1]
+    elif len(matches) > 1:
+        print(f"Ambiguous match for '{arg}'. Matches:")
+        for fname, _ in matches:
+            print(f"  {fname}")
+        return None
+
+    return None
+
+
+def print_data_index():
+    """Print a numbered list of available data configs."""
+    entries = list_data_files()
+    if not entries:
+        print("No data files found in data/ folder.")
+        return
+    print("Available data configs:")
+    for idx, fname, _ in entries:
+        prefix = f"  [{idx}]" if idx is not None else "  [?]"
+        # strip index prefix and .json suffix for display
+        name_part = fname.split("_", 1)[1].replace(".json", "").replace("_", " ") if "_" in fname else fname
+        print(f"{prefix} {name_part}  ({fname})")
+
+
+def load_config_from_file(fpath: str) -> dict:
+    """Load a JSON config file, merge with defaults, and validate."""
+    with open(fpath, "r") as f:
+        user_cfg = json.load(f)
+    if not isinstance(user_cfg, dict):
+        raise ValueError(f"JSON in {fpath} must be an object (dict).")
+    cfg = DEFAULTS.copy()
+    cfg.update(user_cfg)
+    return validate_config(cfg)
 
 
 # ----------------------------
@@ -508,11 +606,39 @@ def try_matplotlib_plots(labels, start_index, counts, title_prefix):
 def main():
     print("=== MULTIMODAL / NOISY CLOCK WALK (JSON or prompts + progress) ===")
 
+    # Handle CLI arguments: index, filename, substring, or --list
+    if len(sys.argv) > 1:
+        arg = sys.argv[1]
+
+        if arg in ("--list", "-l"):
+            print_data_index()
+            return
+
+        if arg in ("--help", "-h"):
+            print("Usage: python clock_walk.py [OPTION]")
+            print()
+            print("Options:")
+            print("  <index>       Load data config by index (e.g. 0, 3, 9)")
+            print("  <name>        Load by filename or substring (e.g. 'sticky', 'attractor')")
+            print("  --list, -l    List all available data configs")
+            print("  --help, -h    Show this help message")
+            print()
+            print("With no arguments, launches interactive config mode.")
+            return
+
+        fpath = resolve_data_file(arg)
+        if fpath is None:
+            print(f"Could not resolve '{arg}' to a data file.")
+            print("Use --list to see available configs.")
+            return
+        print(f"Loading config: {os.path.basename(fpath)}")
+        cfg = load_config_from_file(fpath)
+    else:
+        cfg = get_config()
+
     labels = [12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
     start_index = 0
     start_label = labels[start_index]
-
-    cfg = get_config()
 
     runs = cfg["runs"]
     target = cfg["target"]
